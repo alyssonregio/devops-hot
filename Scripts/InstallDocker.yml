@@ -1,0 +1,13 @@
+---
+
+- hosts: all
+  become: true
+  become_user: root
+
+  tasks:
+    - name: install docker
+      yum: name=docker state=latest
+      
+
+    - name: make sure docker service is up
+      service: name=docker state=running
