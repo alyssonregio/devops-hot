@@ -8,7 +8,7 @@
     - name: Pull helloworld
       docker:
         name: Helloworld 
-        image: hello-world
+        image: tutum/hello-world
         state: running
         ports: 8081:80 
 
