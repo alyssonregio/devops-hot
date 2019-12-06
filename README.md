@@ -14,7 +14,7 @@ Instalar Ansible em um dos hosts;
 
 Instalar o ansible install docker e demais requisitos nos 3 hosts;
 
-Implante o serviço https://hub.docker.com/r/amd64/hello-world/ em HA utilizando Ansible ;
+Implante o serviço https://hub.docker.com/r/tutum/hello-world/ utilizando Ansible ;
 
 Loadbalancer : AWS EC2 -> nginx-host ;
 
@@ -59,7 +59,7 @@ Instalar o Docker usando o comando abaixo da máquina (nginx-host) onde o ansibl
 
 ansible-playbook InstallDockerPlay.yml -i Hosts -vvvv
 
-Instalar/deploy das 2 aplicações'Hello'World'' usando a imagem disponível no Docker Hub (nginx-host) onde o Ansible é instalado:
+Instalar/deploy das 2 aplicações 'Hello'World'' usando a imagem Tutum do Docker Hub (nginx-host) onde o Ansible é instalado:
 
 ansible-playbook DockerHelloWorld1.yml -i Hosthelloworld_1.ini -vvvv
 
@@ -86,6 +86,7 @@ sudo docker exec -it <nginx_container_id> bash
 *echo "upstream servers { server ${Hosthelloworld_1}:8080; server ${Hosthelloworld_2}:8081; }
 server { listen 80; location / { proxy_pass http://servers; } }” > /etc/nginx/conf.d/default.conf *
 
-Agora atualize o navegador para ser direcionado a cada Backend
+Agora atualize o navegador para ser direcionado a cada Backend. A Imagem Tutum irá exibir o código do container que está sendo executado 
+durante este acesso.
 
 http://{nginx_hostIp}}}/
