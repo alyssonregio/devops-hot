@@ -20,79 +20,72 @@ Loadbalancer : AWS EC2 -> nginx-host ;
 
 Aplicação : AWS EC2 -> hello_world_host e AWS EC2 -> hello_world_host ;
 
-Prerequistes para este projecto :
+Requisitos:
 
-Se você não tiver uma conta da AWS válida, então você pode criar uma conta de nível gratuito, inscrevendo-se em https://aws.amazon.com/
+Criar "AWS Access Key ID & AWS Secret Access Key" , essas chaves serão usadas pelo terraform para criar e excluir instâncias da AWS;
 
-certifique-se de criar "AWS Access Key ID & AWS Secret Access Key" , essas chaves serão usadas pelo terraform para criar e excluir instâncias da AWS
+Criar um par de chaves ssh que será usado para fazer ssh nas instâncias, baixar arquivo key.pem e usá-lo durante a execução Ansible;
 
-criar um par de chaves ssh que será usado para fazer ssh para nós ec2 , baixar arquivo key.pem e usá-lo durante a execução ansible
+O ssh-keyscan é necessário para as 3 máquinas para evitar a verificação de hosts conhecidos durante a execução Aansible;
 
-ssh-keyscan pode ser necessário para 3 máquinas de host ansible para evitar a verificação de hosts conhecidos durante a execução ansible
-
-Passos para começar:
+Iniciando:
 
 Instalando o Terraform:
 
-Downlaod configuração necessária a partir de https://www.terraform.io/downloads.html
+Downlaod configuração necessária a partir de https://www.terraform.io/downloads.html;
 
-Instalador do Linux que eu carreguei no repo e também no terraform_0.9.8.8_linux_amd64.zip
+Instalador disponível no repositório no GIT terraform_0.12.17_linux_amd64;
 
-sudo yum install unzip -y unzip unzip terraform_0.9.8.8_linux_amd64.zip sudo ln -s /home/ec2-user/terraform /usr/bin/terraform
+Instalando Unzip e descompactando o terraform:
+[sudo yum install unzip -y unzip unzip terraform_0.12.17_linux_amd64.zip sudo ln -s /home/ec2-user/terraform /usr/bin/terraform]
 
-o comando de tipo "terraform" para validar o terraform foi instalado e está no caminho
-
-Uma vez instalado o terraform, estamos prontos para começar.
-
-Use script/template aws_ec2_creation_template.tf para criar o nó aws ec2 usando o comando abaixo https://www.terraform.io/intro/getting-started/build.html
+Utilizei o script/template ec2.tf para criar as instâncias AWS EC2 usando o comando abaixo https://www.terraform.io/intro/getting-started/build.html
 
 Comandos a serem digitados a partir do diretório Scripts :
 
-cd Scripts; plano de terraformas; aplicar terraformes; mostrar terraformes;
+cd Scripts; terraform plan; terraform apply; terraform show;
 
-terraform show lhe dará os IPs requeridos de hosts ec2 criados, pegue public_ip de cada saída e atualize em todos os arquivos de hosts conforme necessário
+terraform show exibirá os IPs dos instâncias criadas. Com o public_ip de cada saída e atualize em todos os arquivos de hosts conforme necessário;
 
 Instalar ansible usando o script InstallAnsible.sh em qualquer host , digamos no nginx-host
 
 *./InstallAnsible.sh *
 
-Instale o prereq relacionado ao Docker usando o comando abaixo da máquina (nginx-host) onde o ansible é instalado
+Instale o requisito relacionado ao Docker usando o comando abaixo da máquina (nginx-host) onde o ansible é instalado:
 
 ansible-playbook InstallPy.yml -i Hosts -vvvv
 
-Instalar o Docker usando o comando abaixo da máquina (nginx-host) onde o ansible está instalado (Docker_Repo_Pre_Req.sh pode precisar ser excutado caso o docker não esteja presente no repositório padrão em máquinas ost alvo)
+Instalar o Docker usando o comando abaixo da máquina (nginx-host) onde o ansible está instalado (Pode ser necessário executar o script Docker_Repo_Pre_Req.sh caso o docker não esteja presente no repositório padrão em máquinas host alvo);
 
 ansible-playbook InstallDockerPlay.yml -i Hosts -vvvv
 
-Instalar/implementar 2 aplicações do mundo do olá usando a imagem da janela de encaixe tutum usando o comando abaixo da máquina (nginx-host) onde o ansible é instalado
+Instalar/deploy das 2 aplicações'Hello'World'' usando a imagem disponível no Docker Hub (nginx-host) onde o Ansible é instalado:
 
-ansible-playbook PullDockerHello.yml -i Host_helloworld_1.ini -vvvv
+ansible-playbook DockerHelloWorld1.yml -i Hosthelloworld_1.ini -vvvv
 
-ansible-playbook PullDockerHello2.yml -i Host_helloworld_2.ini -vvvv
+ansible-playbook DockerHelloWorld2.yml -i Hosthelloworld_2.ini -vvvv
 
-Instale/implante a imagem da janela de encaixe do nginx Lb usando o comando abaixo da máquina (nginx-host) onde o ansible está instalado
+Instalar/deploy da imagem Docker do NGINX (Load Balance) utilizando o comando abaixo da máquina (nginx-host) onde o ansible está instalado:
 
-ansible-playbook PullDockerNginx.yml -i Host_Nginx.ini -vvvv
+ansible-playbook DockerNginx.yml -i Host_Nginx.ini -vvvv
 
-Agora o ssh para todas as 3 máquinas docker usando o comando abaixo e verifique se os containers estão funcionando
+Agora o SSH para todas as 3 containers usando o comando abaixo (Verifica se estão em execução):
 
 *ssh -i key.pem ec2-user@host_ip" *sudo docker ps -a"
 
-verificar se o servidor nginx está acima, o navegador web aberto diz cromo e entra no ip público do anfitrião (certifique-se de que as regras de entrada no grupo de segurança do aws estão bem para http para o nginx webui para abrir)
+Verificar se o Servidor Nginx está em execução, utilizando o IP público do Host:
 
-http://{nginx_hostIp}}}/
+http://nginx_hostIp/
 
-Agora acesse o container do docker nginx e modifique o arquivo /etc/nginx/conf.d/default.conf Este servidor aceita todo o tráfego para a porta 80 e o passa para o upstream. Note que o nome do upstream e o proxy_pass precisam corresponder. file deve se parecer com o presente na pasta de scripts nginx.cong , apenas atualize os IPs do host
+Agora acesse o Container do NGINX e modifique o arquivo /etc/nginx/conf.d/default.conf. Este servidor aceita todo o tráfego para a porta 80 e faz o upstream para o Backend. Note que o nome do upstream e o proxy_pass precisam ser idênticos. Apenas atualize os IPs do host no ginx.conf
 
 sudo docker ps -a
 
 sudo docker exec -it <nginx_container_id> bash
 
-*echo "upstream servers { server ${hello-world-app1-ip}:8080; server ${hello-world-app2-ip}:8081; }
+*echo "upstream servers { server ${Hosthelloworld_1}:8080; server ${Hosthelloworld_2}:8081; }
 server { listen 80; location / { proxy_pass http://servers; } }” > /etc/nginx/conf.d/default.conf *
 
-Agora atualize o webui no navegador cromado e você deve ver o id do recipiente do diff para cada atualização como mostrado nas imagens anexas
+Agora atualize o navegador para ser direcionado a cada Backend
 
 http://{nginx_hostIp}}}/
-
-Assim, implementamos HA usando docker ansible e nginx como LB , aproveite :)
